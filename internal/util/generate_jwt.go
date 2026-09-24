@@ -1,9 +1,9 @@
 package util
 
 import (
-	"absen-qr-backend/internal/entity"
-	"absen-qr-backend/internal/model"
 	"fmt"
+	entity "klinikserver/internal/entity/authentication"
+	"klinikserver/internal/model"
 	"os"
 	"strconv"
 	"time"
@@ -27,14 +27,14 @@ func GenerateTokenLogin(request *entity.User) (string, error) {
 	token.UserID = request.ID
 	token.Username = request.Username
 
-	switch request.Role {
-	case "coach":
-		token.FullName = request.Coach.FullName
-	case "student":
-		token.FullName = request.Student.FullName
-	}
+	// switch request.Role {
+	// case "coach":
+	// 	token.FullName = request.Coach.FullName
+	// case "student":
+	// 	token.FullName = request.Student.FullName
+	// }
 
-	token.Role = request.Role
+	// token.Role = request.Role
 
 	_token := jwt.NewWithClaims(jwt.SigningMethodHS256, token)
 	return _token.SignedString([]byte(os.Getenv("SECRET_KEY")))

@@ -2,7 +2,7 @@ package http
 
 import (
 	"klinikserver/internal/model"
-	"klinikserver/internal/usecase"
+	usecase "klinikserver/internal/usecase/user"
 	"log"
 	"os"
 	"strconv"

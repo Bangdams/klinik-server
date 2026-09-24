@@ -10,9 +10,10 @@ func UserToResponse(user *entity.User) *model.UserResponse {
 	log.Println("log from user to response")
 
 	reponse := &model.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		// Role:      user.Role,
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Phone:     user.Phone,
+		Status:    user.Status,
 		CreatedAt: user.CreatedAt.Format("2006-01-02"),
 	}
 
@@ -23,9 +24,10 @@ func UserToResponseForUpdate(user *entity.User) *model.UserResponse {
 	log.Println("log from UserToResponseForUpdate")
 
 	return &model.UserResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		// Role:      user.Role,
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Phone:     user.Phone,
+		Status:    user.Status,
 		CreatedAt: user.CreatedAt.Format("2006-01-02"),
 	}
 }
