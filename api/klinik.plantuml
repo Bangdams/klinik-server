@@ -1,0 +1,727 @@
+@startuml Clinic Management System ERD
+
+hide circle
+skinparam linetype ortho
+skinparam entity {
+    BackgroundColor #F8F9FA
+    BorderColor #343A40
+    FontColor #212529
+}
+
+' =========================================================
+' CLINIC & ORGANIZATION
+' =========================================================
+
+entity clinics {
+    * id : UUID <<PK>>
+    --
+    code : VARCHAR
+    name : VARCHAR
+    address : TEXT
+    phone : VARCHAR
+    email : VARCHAR
+    timezone : VARCHAR
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity departments {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    code : VARCHAR
+    name : VARCHAR
+    description : TEXT
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity rooms {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    * department_id : UUID <<FK>>
+    code : VARCHAR
+    name : VARCHAR
+    floor : VARCHAR
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity services {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    code : VARCHAR
+    name : VARCHAR
+    description : TEXT
+    price : DECIMAL
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' AUTHENTICATION & RBAC
+' =========================================================
+
+entity users {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    username : VARCHAR
+    email : VARCHAR
+    password_hash : TEXT
+    full_name : VARCHAR
+    phone : VARCHAR
+    status : VARCHAR
+    last_login_at : TIMESTAMP
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+    deleted_at : TIMESTAMP
+}
+
+entity roles {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR
+    description : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity user_roles {
+    * user_id : UUID <<PK, FK>>
+    * role_id : UUID <<PK, FK>>
+}
+
+entity user_sessions {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK>>
+    refresh_token_hash : TEXT
+    ip_address : VARCHAR
+    user_agent : TEXT
+    expires_at : TIMESTAMP
+    created_at : TIMESTAMP
+    revoked_at : TIMESTAMP
+}
+
+' =========================================================
+' DOCTOR
+' =========================================================
+
+entity doctors {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK>>
+    * clinic_id : UUID <<FK>>
+    license_number : VARCHAR
+    specialization : VARCHAR
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity doctor_schedules {
+    * id : UUID <<PK>>
+    --
+    * doctor_id : UUID <<FK>>
+    * department_id : UUID <<FK>>
+    day_of_week : SMALLINT
+    start_time : TIME
+    end_time : TIME
+    slot_duration : INTEGER
+    max_patients : INTEGER
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' PATIENT
+' =========================================================
+
+entity patients {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    user_id : UUID <<FK>>
+    medical_record_no : VARCHAR
+    nik : VARCHAR
+    full_name : VARCHAR
+    birth_date : DATE
+    birth_place : VARCHAR
+    gender : VARCHAR
+    blood_type : VARCHAR
+    phone : VARCHAR
+    email : VARCHAR
+    occupation : VARCHAR
+    marital_status : VARCHAR
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+    deleted_at : TIMESTAMP
+}
+
+entity patient_addresses {
+    * id : UUID <<PK>>
+    --
+    * patient_id : UUID <<FK>>
+    label : VARCHAR
+    address : TEXT
+    province : VARCHAR
+    city : VARCHAR
+    district : VARCHAR
+    village : VARCHAR
+    postal_code : VARCHAR
+    is_primary : BOOLEAN
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity patient_emergency_contacts {
+    * id : UUID <<PK>>
+    --
+    * patient_id : UUID <<FK>>
+    name : VARCHAR
+    relationship : VARCHAR
+    phone : VARCHAR
+    address : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' QR SYSTEM
+' =========================================================
+
+entity patient_qr {
+    * id : UUID <<PK>>
+    --
+    * patient_id : UUID <<FK>>
+    token_hash : TEXT
+    status : VARCHAR
+    issued_at : TIMESTAMP
+    expires_at : TIMESTAMP
+    revoked_at : TIMESTAMP
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity visit_qr {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    token_hash : TEXT
+    status : VARCHAR
+    expires_at : TIMESTAMP
+    scanned_at : TIMESTAMP
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' APPOINTMENT & VISIT
+' =========================================================
+
+entity appointments {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    * patient_id : UUID <<FK>>
+    * doctor_id : UUID <<FK>>
+    * department_id : UUID <<FK>>
+    schedule_id : UUID <<FK>>
+    appointment_date : DATE
+    appointment_number : VARCHAR
+    status : VARCHAR
+    booking_source : VARCHAR
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+    cancelled_at : TIMESTAMP
+}
+
+entity visits {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    * patient_id : UUID <<FK>>
+    * doctor_id : UUID <<FK>>
+    * department_id : UUID <<FK>>
+    appointment_id : UUID <<FK>>
+    visit_number : VARCHAR
+    visit_date : DATE
+    visit_type : VARCHAR
+    payment_type : VARCHAR
+    status : VARCHAR
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+    completed_at : TIMESTAMP
+}
+
+entity queues {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * department_id : UUID <<FK>>
+    queue_number : VARCHAR
+    queue_date : DATE
+    status : VARCHAR
+    called_at : TIMESTAMP
+    started_at : TIMESTAMP
+    completed_at : TIMESTAMP
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' TRIAGE & MEDICAL RECORD
+' =========================================================
+
+entity triages {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * nurse_id : UUID <<FK>>
+    chief_complaint : TEXT
+    weight : DECIMAL
+    height : DECIMAL
+    temperature : DECIMAL
+    systolic : INTEGER
+    diastolic : INTEGER
+    heart_rate : INTEGER
+    respiratory_rate : INTEGER
+    oxygen_saturation : DECIMAL
+    pain_scale : INTEGER
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity medical_records {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * doctor_id : UUID <<FK>>
+    subjective : TEXT
+    objective : TEXT
+    assessment : TEXT
+    plan : TEXT
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity diagnosis_master {
+    * id : UUID <<PK>>
+    --
+    code : VARCHAR
+    name : VARCHAR
+    description : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity visit_diagnoses {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * diagnosis_id : UUID <<FK>>
+    type : VARCHAR
+    notes : TEXT
+    created_at : TIMESTAMP
+}
+
+entity procedure_master {
+    * id : UUID <<PK>>
+    --
+    code : VARCHAR
+    name : VARCHAR
+    description : TEXT
+    default_price : DECIMAL
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity visit_procedures {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * procedure_id : UUID <<FK>>
+    * doctor_id : UUID <<FK>>
+    quantity : INTEGER
+    price : DECIMAL
+    notes : TEXT
+    created_at : TIMESTAMP
+}
+
+entity medical_record_attachments {
+    * id : UUID <<PK>>
+    --
+    * medical_record_id : UUID <<FK>>
+    file_name : VARCHAR
+    file_path : TEXT
+    mime_type : VARCHAR
+    file_size : BIGINT
+    * uploaded_by : UUID <<FK>>
+    created_at : TIMESTAMP
+}
+
+' =========================================================
+' PHARMACY
+' =========================================================
+
+entity medicine_categories {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR
+    description : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity medicines {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    * category_id : UUID <<FK>>
+    code : VARCHAR
+    name : VARCHAR
+    generic_name : VARCHAR
+    unit : VARCHAR
+    purchase_price : DECIMAL
+    selling_price : DECIMAL
+    minimum_stock : INTEGER
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity medicine_batches {
+    * id : UUID <<PK>>
+    --
+    * medicine_id : UUID <<FK>>
+    batch_number : VARCHAR
+    expired_at : DATE
+    purchase_price : DECIMAL
+    selling_price : DECIMAL
+    quantity : INTEGER
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity stock_movements {
+    * id : UUID <<PK>>
+    --
+    * medicine_id : UUID <<FK>>
+    * batch_id : UUID <<FK>>
+    type : VARCHAR
+    quantity : INTEGER
+    reference_type : VARCHAR
+    reference_id : UUID
+    notes : TEXT
+    * created_by : UUID <<FK>>
+    created_at : TIMESTAMP
+}
+
+entity prescriptions {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * doctor_id : UUID <<FK>>
+    prescription_number : VARCHAR
+    status : VARCHAR
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity prescription_items {
+    * id : UUID <<PK>>
+    --
+    * prescription_id : UUID <<FK>>
+    * medicine_id : UUID <<FK>>
+    quantity : INTEGER
+    dosage : VARCHAR
+    frequency : VARCHAR
+    duration : VARCHAR
+    unit : VARCHAR
+    route : VARCHAR
+    instruction : TEXT
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity dispensations {
+    * id : UUID <<PK>>
+    --
+    * prescription_id : UUID <<FK>>
+    * pharmacist_id : UUID <<FK>>
+    dispensed_at : TIMESTAMP
+    status : VARCHAR
+    notes : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity dispensation_items {
+    * id : UUID <<PK>>
+    --
+    * dispensation_id : UUID <<FK>>
+    * prescription_item_id : UUID <<FK>>
+    * batch_id : UUID <<FK>>
+    quantity : INTEGER
+    created_at : TIMESTAMP
+}
+
+' =========================================================
+' LABORATORY
+' =========================================================
+
+entity lab_tests {
+    * id : UUID <<PK>>
+    --
+    code : VARCHAR
+    name : VARCHAR
+    unit : VARCHAR
+    normal_range : VARCHAR
+    price : DECIMAL
+    status : VARCHAR
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity lab_orders {
+    * id : UUID <<PK>>
+    --
+    * visit_id : UUID <<FK>>
+    * doctor_id : UUID <<FK>>
+    order_number : VARCHAR
+    status : VARCHAR
+    notes : TEXT
+    ordered_at : TIMESTAMP
+    completed_at : TIMESTAMP
+}
+
+entity lab_order_items {
+    * id : UUID <<PK>>
+    --
+    * lab_order_id : UUID <<FK>>
+    * lab_test_id : UUID <<FK>>
+    result_value : VARCHAR
+    result_text : TEXT
+    reference_range : VARCHAR
+    status : VARCHAR
+    verified_by : UUID <<FK>>
+    verified_at : TIMESTAMP
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' BILLING & PAYMENT
+' =========================================================
+
+entity invoices {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    * visit_id : UUID <<FK>>
+    invoice_number : VARCHAR
+    subtotal : DECIMAL
+    discount : DECIMAL
+    tax : DECIMAL
+    total : DECIMAL
+    status : VARCHAR
+    due_date : DATE
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity invoice_items {
+    * id : UUID <<PK>>
+    --
+    * invoice_id : UUID <<FK>>
+    item_type : VARCHAR
+    reference_id : UUID
+    description : TEXT
+    quantity : INTEGER
+    unit_price : DECIMAL
+    discount : DECIMAL
+    subtotal : DECIMAL
+    created_at : TIMESTAMP
+}
+
+entity payments {
+    * id : UUID <<PK>>
+    --
+    * invoice_id : UUID <<FK>>
+    payment_number : VARCHAR
+    method : VARCHAR
+    amount : DECIMAL
+    status : VARCHAR
+    paid_at : TIMESTAMP
+    reference_number : VARCHAR
+    * created_by : UUID <<FK>>
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity payment_qr {
+    * id : UUID <<PK>>
+    --
+    * payment_id : UUID <<FK>>
+    provider : VARCHAR
+    external_id : VARCHAR
+    qr_string : TEXT
+    amount : DECIMAL
+    status : VARCHAR
+    expired_at : TIMESTAMP
+    paid_at : TIMESTAMP
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' =========================================================
+' SYSTEM
+' =========================================================
+
+entity notifications {
+    * id : UUID <<PK>>
+    --
+    * user_id : UUID <<FK>>
+    type : VARCHAR
+    title : VARCHAR
+    message : TEXT
+    reference_type : VARCHAR
+    reference_id : UUID
+    is_read : BOOLEAN
+    created_at : TIMESTAMP
+    read_at : TIMESTAMP
+}
+
+entity audit_logs {
+    * id : UUID <<PK>>
+    --
+    * clinic_id : UUID <<FK>>
+    * user_id : UUID <<FK>>
+    action : VARCHAR
+    resource : VARCHAR
+    resource_id : UUID
+    old_data : JSONB
+    new_data : JSONB
+    ip_address : VARCHAR
+    user_agent : TEXT
+    created_at : TIMESTAMP
+}
+
+' =========================================================
+' RELATIONSHIPS
+' =========================================================
+
+' Clinic
+clinics ||--o{ users
+clinics ||--o{ departments
+clinics ||--o{ rooms
+clinics ||--o{ services
+clinics ||--o{ doctors
+clinics ||--o{ patients
+clinics ||--o{ appointments
+clinics ||--o{ visits
+clinics ||--o{ medicines
+clinics ||--o{ invoices
+clinics ||--o{ audit_logs
+
+' Authentication
+users ||--o{ user_roles
+roles ||--o{ user_roles
+users ||--o{ user_sessions
+
+' Organization
+departments ||--o{ rooms
+departments ||--o{ doctor_schedules
+departments ||--o{ appointments
+departments ||--o{ visits
+departments ||--o{ queues
+
+' Doctors
+users ||--o| doctors
+doctors ||--o{ doctor_schedules
+doctors ||--o{ appointments
+doctors ||--o{ visits
+doctors ||--o{ medical_records
+doctors ||--o{ visit_procedures
+doctors ||--o{ prescriptions
+doctors ||--o{ lab_orders
+
+' Patients
+users ||--o| patients
+patients ||--o{ patient_addresses
+patients ||--o{ patient_emergency_contacts
+patients ||--o{ patient_qr
+patients ||--o{ appointments
+patients ||--o{ visits
+
+' QR
+visits ||--o| visit_qr
+
+' Appointment
+doctor_schedules ||--o{ appointments
+appointments ||--o| visits
+
+' Visit
+visits ||--o{ queues
+visits ||--o| triages
+visits ||--o| medical_records
+visits ||--o{ visit_diagnoses
+visits ||--o{ visit_procedures
+visits ||--o{ prescriptions
+visits ||--o{ lab_orders
+visits ||--o| invoices
+
+' Medical
+users ||--o{ triages
+diagnosis_master ||--o{ visit_diagnoses
+procedure_master ||--o{ visit_procedures
+medical_records ||--o{ medical_record_attachments
+users ||--o{ medical_record_attachments
+
+' Pharmacy
+medicine_categories ||--o{ medicines
+medicines ||--o{ medicine_batches
+medicines ||--o{ stock_movements
+medicine_batches ||--o{ stock_movements
+
+prescriptions ||--o{ prescription_items
+medicines ||--o{ prescription_items
+
+prescriptions ||--o| dispensations
+users ||--o{ dispensations
+dispensations ||--o{ dispensation_items
+prescription_items ||--o{ dispensation_items
+medicine_batches ||--o{ dispensation_items
+users ||--o{ stock_movements
+
+' Laboratory
+lab_orders ||--o{ lab_order_items
+lab_tests ||--o{ lab_order_items
+users ||--o{ lab_order_items
+
+' Billing
+invoices ||--o{ invoice_items
+invoices ||--o{ payments
+payments ||--o| payment_qr
+users ||--o{ payments
+
+' System
+users ||--o{ notifications
+users ||--o{ audit_logs
+
+@enduml
