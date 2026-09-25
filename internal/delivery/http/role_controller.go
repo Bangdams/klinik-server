@@ -47,9 +47,9 @@ func (controller *RoleControllerImpl) Create(ctx *fiber.Ctx) error {
 // ?? cek kemanan na soalna pakai query parameter jang name na kana ai we
 // Delete implements [RoleController].
 func (controller *RoleControllerImpl) Delete(ctx *fiber.Ctx) error {
-	name := ctx.Params("name")
+	id := ctx.Params("id")
 
-	if err := controller.RoleUsecase.Delete(ctx.UserContext(), name); err != nil {
+	if err := controller.RoleUsecase.Delete(ctx.UserContext(), id); err != nil {
 		log.Println("failed to delete role")
 		return err
 	}
@@ -83,7 +83,7 @@ func (controller *RoleControllerImpl) FindAll(ctx *fiber.Ctx) error {
 
 // FindByName implements [RoleController].
 func (controller *RoleControllerImpl) FindByName(ctx *fiber.Ctx) error {
-	panic("unimplemented")
+	return nil
 }
 
 // Update implements [RoleController].

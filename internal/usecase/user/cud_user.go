@@ -50,6 +50,14 @@ func (userUsecase *UserUsecaseImpl) Create(ctx context.Context, request *model.U
 		return nil, fiber.ErrInternalServerError
 	}
 
+	roles := []entity.UserRole{}
+
+	for _, v := range request.RoleId {
+		roles = append(roles, entity.UserRole{
+			RoleId: uuid.MustParse(v),
+		})
+	}
+
 	user := &entity.User{
 		ClinicId:     uuid.MustParse(request.ClinicId),
 		Username:     request.Username,
@@ -58,22 +66,8 @@ func (userUsecase *UserUsecaseImpl) Create(ctx context.Context, request *model.U
 		FullName:     request.FullName,
 		Phone:        request.Phone,
 		Status:       request.Status,
+		UserRole:     roles,
 	}
-
-	// switch user.Role {
-	// case "coach":
-	// 	user.Coach = entity.Coach{
-	// 		Nip:      request.CoachRequest.Nip,
-	// 		FullName: request.CoachRequest.FullName,
-	// 	}
-	// case "student":
-	// 	user.Student = entity.Student{
-	// 		Nis:         request.StudentRequest.Nis,
-	// 		FullName:    request.StudentRequest.FullName,
-	// 		Address:     request.StudentRequest.Address,
-	// 		PhoneNumber: request.StudentRequest.PhoneNumber,
-	// 	}
-	// }
 
 	if err := userUsecase.UserRepo.FindByUsername(tx, user); err == nil {
 		errorResponse.Message = "Duplicate entry"

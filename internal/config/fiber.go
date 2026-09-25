@@ -12,7 +12,7 @@ import (
 
 func NewFiber() *fiber.App {
 	var app = fiber.New(fiber.Config{
-		AppName:      "AbsenQR API",
+		AppName:      "klinik server",
 		ErrorHandler: NewErrorHandler(),
 	})
 

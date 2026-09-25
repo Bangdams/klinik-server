@@ -17,6 +17,12 @@ func (config *RouteConfig) Setup() {
 	config.App.Post("/login", config.UserController.Login)
 	config.App.Post("/logout", config.UserController.Logout)
 
+	config.App.Get("/role", config.RoleController.FindAll)
+	config.App.Get("/role/:name", config.RoleController.FindByName)
+	config.App.Post("/role", config.RoleController.Create)
+	config.App.Put("/role", config.RoleController.Update)
+	config.App.Delete("/role/:id", config.RoleController.Delete)
+
 	// Group Api
 	api := config.App.Group("/api")
 

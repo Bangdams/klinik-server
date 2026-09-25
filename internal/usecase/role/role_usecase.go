@@ -13,7 +13,7 @@ type RoleUsecase interface {
 	FindByName(ctx context.Context, name string) (*model.RoleResponse, error)
 	FindAll(ctx context.Context, name string, order string, page int, limit int) (*[]model.RoleResponse, *int, *int, *int, error)
 	Create(ctx context.Context, request *model.RoleRequest) (*model.RoleResponse, error)
-	Delete(ctx context.Context, name string) error
+	Delete(ctx context.Context, id string) error
 	Update(ctx context.Context, request *model.UpdateRoleRequest) (*model.RoleResponse, error)
 }
 

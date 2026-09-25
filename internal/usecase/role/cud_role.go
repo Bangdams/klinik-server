@@ -14,6 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -43,6 +44,7 @@ func (roleUsecase *RoleUsecaseImpl) Create(ctx context.Context, request *model.R
 	}
 
 	role := &entity.Role{
+		ID:          uuid.New(),
 		Name:        request.Name,
 		Description: request.Description,
 	}
@@ -73,14 +75,14 @@ func (roleUsecase *RoleUsecaseImpl) Create(ctx context.Context, request *model.R
 }
 
 // Delete implements [RoleUsecase].
-func (roleUsecase *RoleUsecaseImpl) Delete(ctx context.Context, name string) error {
+func (roleUsecase *RoleUsecaseImpl) Delete(ctx context.Context, id string) error {
 	tx := roleUsecase.DB.WithContext(ctx).Begin()
 	defer tx.Rollback()
 
 	role := &entity.Role{}
-	role.Name = name
+	role.ID = uuid.MustParse(id)
 
-	err := roleUsecase.RoleRepo.FindByName(tx, role)
+	err := roleUsecase.RoleRepo.FindById(tx, role)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			errorResponse := model.ErrorResponse{

@@ -9,6 +9,7 @@ import (
 type RoleRepository interface {
 	FindAll(tx *gorm.DB, name string, pageSize int, offset int, order string, roles *[]entity.Role) (int64, error)
 	FindByName(tx *gorm.DB, role *entity.Role) error
+	FindById(tx *gorm.DB, role *entity.Role) error
 	Create(tx *gorm.DB, role *entity.Role) error
 	Update(tx *gorm.DB, role *entity.Role) error
 	Delete(tx *gorm.DB, role *entity.Role) error
@@ -51,6 +52,15 @@ func (repository *RoleRepositoryImpl) FindByName(tx *gorm.DB, role *entity.Role)
 	return tx.
 		Model(&entity.Role{}).
 		Where("name = ?", role.Name).
+		First(role).
+		Error
+}
+
+// FindById implements [RoleRepository].
+func (repository *RoleRepositoryImpl) FindById(tx *gorm.DB, role *entity.Role) error {
+	return tx.
+		Model(&entity.Role{}).
+		Where("id = ?", role.ID).
 		First(role).
 		Error
 }
