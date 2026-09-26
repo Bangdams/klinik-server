@@ -2,6 +2,7 @@ package route
 
 import (
 	"klinikserver/internal/delivery/http"
+	"klinikserver/internal/util"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,26 +18,20 @@ func (config *RouteConfig) Setup() {
 	config.App.Post("/login", config.UserController.Login)
 	config.App.Post("/logout", config.UserController.Logout)
 
-	config.App.Get("/role", config.RoleController.FindAll)
-	config.App.Get("/role/:name", config.RoleController.FindByName)
-	config.App.Post("/role", config.RoleController.Create)
-	config.App.Put("/role", config.RoleController.Update)
-	config.App.Delete("/role/:id", config.RoleController.Delete)
-
 	// Group Api
 	api := config.App.Group("/api")
 
 	// Api For Management User
 	api.Get("/users", config.UserController.FindAll)
-	// api.Get("/users/:id", util.CheckLevel("admin"), config.UserController.FindByIdForUpdate)
-	// api.Post("/users", util.CheckLevel("admin"), config.UserController.Create)
-	// api.Delete("/users/:id", util.CheckLevel("admin"), config.UserController.Delete)
-	// api.Put("/users", util.CheckLevel("admin"), config.UserController.Update)
+	api.Get("/users/:id", util.CheckLevel("admin"), config.UserController.FindByIdForUpdate)
+	api.Post("/users", util.CheckLevel("admin"), config.UserController.Create)
+	api.Delete("/users/:id", util.CheckLevel("admin"), config.UserController.Delete)
+	api.Put("/users", util.CheckLevel("admin"), config.UserController.Update)
 
 	// Api For Management Role
-	api.Get("/role", config.RoleController.FindAll)
-	api.Get("/role/:name", config.RoleController.FindByName)
-	api.Post("/role", config.RoleController.Create)
-	api.Put("/role", config.RoleController.Update)
-	api.Delete("/role", config.RoleController.Delete)
+	api.Get("/role", util.CheckLevel("super"), config.RoleController.FindAll)
+	api.Get("/role/:name", util.CheckLevel("super"), config.RoleController.FindByName)
+	api.Post("/role", util.CheckLevel("super"), config.RoleController.Create)
+	api.Put("/role", util.CheckLevel("super"), config.RoleController.Update)
+	api.Delete("/role", util.CheckLevel("super"), config.RoleController.Delete)
 }

@@ -2,7 +2,6 @@ package util
 
 import (
 	"fmt"
-	entity "klinikserver/internal/entity/authentication"
 	"klinikserver/internal/model"
 	"os"
 	"strconv"
@@ -12,29 +11,25 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateTokenLogin(request *entity.User) (string, error) {
+func GenerateTokenLogin(request *model.LoginResult) (string, error) {
 	var token model.TokenPyload
 	duration := os.Getenv("DURATION_JWT_TOKEN")
 	lifeTime, _ := strconv.Atoi(duration)
 
 	now := time.Now()
 	token.RegisteredClaims = jwt.RegisteredClaims{
-		Issuer:    "AbsenQR",
+		Issuer:    "KlinikQR",
 		IssuedAt:  jwt.NewNumericDate(now),
 		ExpiresAt: jwt.NewNumericDate(now.Add(24 * time.Hour * time.Duration(lifeTime))),
 	}
 
 	token.UserID = request.ID
 	token.Username = request.Username
+	token.FullName = request.FullName
 
-	// switch request.Role {
-	// case "coach":
-	// 	token.FullName = request.Coach.FullName
-	// case "student":
-	// 	token.FullName = request.Student.FullName
-	// }
-
-	// token.Role = request.Role
+	for _, v := range request.RoleName {
+		token.Role = append(token.Role, v)
+	}
 
 	_token := jwt.NewWithClaims(jwt.SigningMethodHS256, token)
 	return _token.SignedString([]byte(os.Getenv("SECRET_KEY")))

@@ -59,13 +59,13 @@ func (userUsecase *UserUsecaseImpl) Create(ctx context.Context, request *model.U
 	}
 
 	user := &entity.User{
+		ID:           uuid.New(),
 		ClinicId:     uuid.MustParse(request.ClinicId),
 		Username:     request.Username,
 		Email:        request.Email,
 		PasswordHash: string(password),
 		FullName:     request.FullName,
 		Phone:        request.Phone,
-		Status:       request.Status,
 		UserRole:     roles,
 	}
 
@@ -181,8 +181,8 @@ func (userUsecase *UserUsecaseImpl) Update(ctx context.Context, request *model.U
 		return nil, fiber.ErrInternalServerError
 	}
 
-	if request.Password != "" {
-		password, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
+	if request.PasswordHash != "" {
+		password, err := bcrypt.GenerateFromPassword([]byte(request.PasswordHash), bcrypt.DefaultCost)
 		if err != nil {
 			log.Println("failed to generate password")
 			return nil, fiber.ErrInternalServerError
@@ -192,21 +192,10 @@ func (userUsecase *UserUsecaseImpl) Update(ctx context.Context, request *model.U
 	}
 
 	user.Username = request.Username
-
-	// switch user.Role {
-	// case "coach":
-	// 	user.Coach = entity.Coach{
-	// 		Nip:      request.CoachRequest.Nip,
-	// 		FullName: request.CoachRequest.FullName,
-	// 	}
-	// case "student":
-	// 	user.Student = entity.Student{
-	// 		Nis:         request.StudentRequest.Nis,
-	// 		FullName:    request.StudentRequest.FullName,
-	// 		Address:     request.StudentRequest.Address,
-	// 		PhoneNumber: request.StudentRequest.PhoneNumber,
-	// 	}
-	// }
+	user.Email = request.Email
+	user.FullName = request.Email
+	user.Phone = request.Phone
+	user.Status = request.Status
 
 	err = userUsecase.UserRepo.Update(tx, user)
 	if err != nil {

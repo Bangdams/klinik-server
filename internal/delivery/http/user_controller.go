@@ -41,9 +41,7 @@ func (controller *UserControllerImpl) FindByIdForUpdate(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	role := ctx.Query("role")
-
-	response, err := controller.UserUsecase.FindByIdForUpdate(ctx.UserContext(), string(id), role)
+	response, err := controller.UserUsecase.FindByIdForUpdate(ctx.UserContext(), string(id))
 	if err != nil {
 		log.Println("failed to delete session")
 		return err
@@ -90,10 +88,7 @@ func (controller *UserControllerImpl) Update(ctx *fiber.Ctx) error {
 
 // Delete implements UserController.
 func (controller UserControllerImpl) Delete(ctx *fiber.Ctx) error {
-	id, err := ctx.ParamsInt("id")
-	if err != nil {
-		return fiber.ErrBadRequest
-	}
+	id := ctx.Params("id")
 
 	if err := controller.UserUsecase.Delete(ctx.UserContext(), string(id)); err != nil {
 		log.Println("failed to delete user")
@@ -113,14 +108,13 @@ func (controller *UserControllerImpl) FindAll(ctx *fiber.Ctx) error {
 	claims := userToken.Claims.(jwt.MapClaims)
 	userId := claims["user_id"].(string)
 
-	role := ctx.Query("role")
 	sortBy := ctx.Query("sort-by")
 
 	order := ctx.Query("order")
 	page := ctx.QueryInt("page")
 	limit := ctx.QueryInt("limit")
 
-	responses, currentPage, totalRecords, totalPages, err := controller.UserUsecase.FindAll(ctx.UserContext(), string(userId), role, order, page, limit, sortBy)
+	responses, currentPage, totalRecords, totalPages, err := controller.UserUsecase.FindAll(ctx.UserContext(), string(userId), order, page, limit, sortBy)
 	if err != nil {
 		log.Println("failed to FindAll user")
 		return err
@@ -195,12 +189,12 @@ func (controller *UserControllerImpl) CheckLogin(ctx *fiber.Ctx) error {
 	userId := claims["user_id"].(string)
 	username := claims["username"].(string)
 	fullName := claims["full_name"].(string)
-	role := claims["role"].(string)
+	role := claims["role"].([]string)
 
 	return ctx.JSON(model.WebResponse[*model.LoginResponse]{Data: &model.LoginResponse{
-		UserID:   uuid.MustParse(userId),
+		ID:       uuid.MustParse(userId),
 		Username: username,
 		FullName: fullName,
-		Role:     role,
+		RoleName: role,
 	}})
 }

@@ -11,10 +11,26 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	UserID   uuid.UUID `json:"user_id"`
+	ID       uuid.UUID `json:"user_id"`
 	Username string    `json:"username"`
 	FullName string    `json:"full_name"`
-	Role     string    `json:"role"`
+	RoleName []string  `json:"role"`
+}
+
+type LoginResult struct {
+	ID           uuid.UUID `json:"user_id"`
+	Username     string    `json:"username"`
+	FullName     string    `json:"full_name"`
+	PasswordHash string
+	RoleName     []string `json:"role"`
+}
+
+type LoginRow struct {
+	ID           uuid.UUID
+	Username     string
+	PasswordHash string
+	FullName     string
+	RoleName     string
 }
 
 type TokenJwt struct {
@@ -30,6 +46,6 @@ type TokenPyload struct {
 	UserID   uuid.UUID `json:"user_id"`
 	Username string    `json:"username"`
 	FullName string    `json:"full_name"`
-	Role     string    `json:"role"`
+	Role     []string  `json:"role"`
 	TokenJwt
 }

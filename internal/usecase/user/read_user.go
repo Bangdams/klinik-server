@@ -16,10 +16,9 @@ import (
 )
 
 // FindById implements UserUsecase.
-func (userUsecase *UserUsecaseImpl) FindByIdForUpdate(ctx context.Context, userId string, role string) (*model.UserResponse, error) {
+func (userUsecase *UserUsecaseImpl) FindByIdForUpdate(ctx context.Context, userId string) (*model.UserResponse, error) {
 	user := &entity.User{
 		ID: uuid.MustParse(userId),
-		// Role: role,
 	}
 
 	err := userUsecase.UserRepo.FindByIdForUpdate(userUsecase.DB.WithContext(ctx), user)
@@ -44,7 +43,7 @@ func (userUsecase *UserUsecaseImpl) FindByIdForUpdate(ctx context.Context, userI
 }
 
 // FindAll implements UserUsecase.
-func (userUsecase *UserUsecaseImpl) FindAll(ctx context.Context, userId string, role string, order string, page int, limit int, sortBy string) (*[]model.UserResponse, *int, *int, *int, error) {
+func (userUsecase *UserUsecaseImpl) FindAll(ctx context.Context, userId string, order string, page int, limit int, sortBy string) (*[]model.UserResponse, *int, *int, *int, error) {
 	var users = &[]entity.User{}
 
 	if page <= 0 {
@@ -60,7 +59,7 @@ func (userUsecase *UserUsecaseImpl) FindAll(ctx context.Context, userId string, 
 		order = "DESC"
 	}
 
-	totalRecords, err := userUsecase.UserRepo.FindAllForPagging(userUsecase.DB.WithContext(ctx), uuid.MustParse(userId), role, limit, offset, order, sortBy, users)
+	totalRecords, err := userUsecase.UserRepo.FindAllForPagging(userUsecase.DB.WithContext(ctx), uuid.MustParse(userId), limit, offset, order, sortBy, users)
 	if err != nil {
 		log.Println("failed when find all repo user : ", err)
 		return nil, nil, nil, nil, fiber.ErrInternalServerError

@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	entity "klinikserver/internal/entity/authentication"
 	"klinikserver/internal/model"
 	"klinikserver/internal/model/converter"
 	"klinikserver/internal/repository"
@@ -16,10 +15,10 @@ import (
 )
 
 type UserUsecase interface {
-	FindByIdForUpdate(ctx context.Context, userId string, role string) (*model.UserResponse, error)
+	FindByIdForUpdate(ctx context.Context, userId string) (*model.UserResponse, error)
 	Create(ctx context.Context, request *model.UserRequest) (*model.UserResponse, error)
 	Delete(ctx context.Context, userId string) error
-	FindAll(ctx context.Context, userId string, role string, order string, page int, limit int, sortBy string) (*[]model.UserResponse, *int, *int, *int, error)
+	FindAll(ctx context.Context, userId string, order string, page int, limit int, sortBy string) (*[]model.UserResponse, *int, *int, *int, error)
 	Login(ctx context.Context, request *model.LoginRequest) (*model.LoginResponse, *string, error)
 	Update(ctx context.Context, request *model.UpdateUserRequest) (*model.UserResponse, error)
 }
@@ -40,7 +39,7 @@ func NewUserUsecase(userRepo repository.UserRepository, DB *gorm.DB, validate *v
 
 // Login implements UserUsecase.
 func (userUsecase *UserUsecaseImpl) Login(ctx context.Context, request *model.LoginRequest) (*model.LoginResponse, *string, error) {
-	user := &entity.User{
+	user := &model.LoginResult{
 		Username: request.Username,
 	}
 

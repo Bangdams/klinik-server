@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -18,7 +19,7 @@ type User struct {
 	LastLoginAt  time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	DeletedAt    time.Time
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
 
 	UserRole []UserRole `gorm:"foreignKey:UserId;references:ID"`
 }
