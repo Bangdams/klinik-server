@@ -32,14 +32,11 @@ func UserToResponseForUpdate(user *entity.User) *model.UserResponse {
 	}
 }
 
-func LoginUserToResponse(user *model.LoginResult) *model.LoginResponse {
+func LoginUserToResponse(accessToken string) *model.LoginResponse {
 	log.Println("log from login user to response")
 
 	loginResponse := &model.LoginResponse{
-		ID:       user.ID,
-		Username: user.Username,
-		FullName: user.FullName,
-		RoleName: user.RoleName,
+		AccessToken: accessToken,
 	}
 
 	return loginResponse

@@ -11,10 +11,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	ID       uuid.UUID `json:"user_id"`
-	Username string    `json:"username"`
-	FullName string    `json:"full_name"`
-	RoleName []string  `json:"role"`
+	AccessToken string `json:"access_token"`
 }
 
 type LoginResult struct {

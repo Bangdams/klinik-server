@@ -22,9 +22,10 @@ func Bootstrap(config *BootstrapConfig) {
 	// repo
 	userRepo := repository.NewUserRepository()
 	roleRepo := repository.NewRoleRepository()
+	refreshRepo := repository.NewRefreshTokenRepository()
 
 	// usecase
-	userUsecase := user.NewUserUsecase(userRepo, config.DB, config.Validate)
+	userUsecase := user.NewUserUsecase(userRepo, refreshRepo, config.DB, config.Validate)
 	roleUsecase := role.NewRoleUsecase(roleRepo, config.DB, config.Validate)
 
 	// controller

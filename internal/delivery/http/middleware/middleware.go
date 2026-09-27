@@ -24,6 +24,7 @@ func Middleware(app *fiber.App) {
 		log.Println("Warning: TIMEOUT_CONTEXT not found or invalid, using default 10s")
 		durationInt = 10
 	}
+
 	app.Use(TimeoutContextMiddleware(time.Duration(durationInt) * time.Second))
 
 	app.Use("/api", jwtware.New(jwtware.Config{

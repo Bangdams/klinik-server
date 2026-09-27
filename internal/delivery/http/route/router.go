@@ -21,6 +21,8 @@ func (config *RouteConfig) Setup() {
 	// Group Api
 	api := config.App.Group("/api")
 
+	api.Get("/check", config.UserController.CheckLogin)
+
 	// Api For Management User
 	api.Get("/users", config.UserController.FindAll)
 	api.Get("/users/:id", util.CheckLevel("admin"), config.UserController.FindByIdForUpdate)

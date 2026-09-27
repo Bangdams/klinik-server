@@ -10,7 +10,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 )
 
 type UserController interface {
@@ -22,6 +21,7 @@ type UserController interface {
 	Login(ctx *fiber.Ctx) error
 	Logout(ctx *fiber.Ctx) error
 	CheckLogin(ctx *fiber.Ctx) error
+	Refresh(ctx *fiber.Ctx) error
 }
 
 type UserControllerImpl struct {
@@ -114,7 +114,7 @@ func (controller *UserControllerImpl) FindAll(ctx *fiber.Ctx) error {
 	page := ctx.QueryInt("page")
 	limit := ctx.QueryInt("limit")
 
-	responses, currentPage, totalRecords, totalPages, err := controller.UserUsecase.FindAll(ctx.UserContext(), string(userId), order, page, limit, sortBy)
+	responses, currentPage, totalRecords, totalPages, err := controller.UserUsecase.FindAll(ctx.UserContext(), userId, order, page, limit, sortBy)
 	if err != nil {
 		log.Println("failed to FindAll user")
 		return err
@@ -128,8 +128,25 @@ func (controller *UserControllerImpl) FindAll(ctx *fiber.Ctx) error {
 	})
 }
 
+// Refresh implements UserController.
+func (controller *UserControllerImpl) Refresh(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("refresh_token")
+	if cookie == "" {
+		return ctx.SendStatus(fiber.StatusUnauthorized)
+	}
+
+	response, err := controller.UserUsecase.Refresh(ctx.UserContext(), cookie)
+	if err != nil {
+		log.Println("failed to create refresh token")
+		return err
+	}
+
+	return ctx.JSON(model.WebResponse[*model.LoginResponse]{Data: response})
+}
+
 // Login implements UserController.
 func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
+	cookie := ctx.Cookies("refresh_token")
 	request := new(model.LoginRequest)
 
 	if err := ctx.BodyParser(request); err != nil {
@@ -137,19 +154,19 @@ func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	response, token, err := controller.UserUsecase.Login(ctx.UserContext(), request)
+	response, refreshToken, err := controller.UserUsecase.Login(ctx.UserContext(), request, cookie)
 	if err != nil {
 		log.Println("failed to login")
 		return err
 	}
 
 	// durasi token
-	duration := os.Getenv("DURATION_JWT_TOKEN")
+	duration := os.Getenv("DURATION_JWT_REFRESH_TOKEN")
 	lifeTime, _ := strconv.Atoi(duration)
 
 	ctx.Cookie(&fiber.Cookie{
-		Name:     "token",
-		Value:    *token,
+		Name:     "refresh_token",
+		Value:    *refreshToken,
 		HTTPOnly: true,
 		Secure:   false,
 		SameSite: "Lax",
@@ -162,13 +179,18 @@ func (controller *UserControllerImpl) Login(ctx *fiber.Ctx) error {
 
 // Logout implements UserController.
 func (controller *UserControllerImpl) Logout(ctx *fiber.Ctx) error {
-	cookie := ctx.Cookies("token")
+	cookie := ctx.Cookies("refresh_token")
 	if cookie == "" {
 		return ctx.SendStatus(fiber.StatusUnauthorized)
 	}
 
+	err := controller.UserUsecase.Logout(ctx.UserContext(), cookie)
+	if err != nil {
+		return err
+	}
+
 	ctx.Cookie(&fiber.Cookie{
-		Name:     "token",
+		Name:     "refresh_token",
 		Value:    "",
 		MaxAge:   -1,
 		Expires:  time.Now().Add(-time.Hour),
@@ -186,15 +208,10 @@ func (controller *UserControllerImpl) CheckLogin(ctx *fiber.Ctx) error {
 	userToken := ctx.Locals("user").(*jwt.Token)
 	claims := userToken.Claims.(jwt.MapClaims)
 
-	userId := claims["user_id"].(string)
-	username := claims["username"].(string)
-	fullName := claims["full_name"].(string)
-	role := claims["role"].([]string)
+	log.Printf("type user id: %T", claims["user_id"])
+	log.Printf("type username: %T", claims["username"])
+	log.Printf("type fullName: %T", claims["full_name"])
+	log.Printf("type role: %T", claims["role"])
 
-	return ctx.JSON(model.WebResponse[*model.LoginResponse]{Data: &model.LoginResponse{
-		ID:       uuid.MustParse(userId),
-		Username: username,
-		FullName: fullName,
-		RoleName: role,
-	}})
+	return nil
 }
